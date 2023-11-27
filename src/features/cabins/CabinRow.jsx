@@ -2,7 +2,9 @@ import styled from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteCabins } from "../../services/apiCabins";
-import {toast} from "react-hot-toast"
+import { toast } from "react-hot-toast";
+import { useState } from "react";
+import CreateCabinForm from "./CreateCabinForm";
 const TableRow = styled.div`
   display: grid;
   grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
@@ -44,11 +46,12 @@ const Discount = styled.div`
 
 // eslint-disable-next-line react/prop-types
 export default function CabinRow({ cabin }) {
+  const [show, setShow] = useState(false);
   const queryClient = useQueryClient();
   const { isLoading, mutate } = useMutation({
     mutationFn: (id) => deleteCabins(id),
     onSuccess: () => {
-      toast.success("cabin deleted successful")
+      toast.success("cabin deleted successful");
       queryClient.invalidateQueries({ queryKey: ["cabins"] });
     },
     onError: (err) => toast.error(err.message),
@@ -57,15 +60,21 @@ export default function CabinRow({ cabin }) {
   // eslint-disable-next-line react/prop-types
   const { id, name, maxCapacity, regularPrice, discount, image } = cabin;
   return (
-    <TableRow role="row">
-      <Img src={image} />
-      <Cabin>{name}</Cabin>
-      <div>fits up to {maxCapacity} guest</div>
-      <Price>{formatCurrency(regularPrice)}</Price>
-      <Discount>{formatCurrency(discount)}</Discount>
-      <button onClick={() => mutate(id)} disabled={isLoading}>
-        delete
-      </button>
-    </TableRow>
+    <>
+      <TableRow role="row">
+        <Img src={image} />
+        <Cabin>{name}</Cabin>
+        <div>fits up to {maxCapacity} guest</div>
+        <Price>{formatCurrency(regularPrice)}</Price>
+        <Discount>{formatCurrency(discount)}</Discount>
+        <div>
+          <button onClick={() => setShow((show) => !show)}>Edit</button>
+          <button onClick={() => mutate(id)} disabled={isLoading}>
+            delete
+          </button>
+        </div>
+      </TableRow>
+      {show && <CreateCabinForm cabinToEdit={cabin} />}
+    </>
   );
 }
