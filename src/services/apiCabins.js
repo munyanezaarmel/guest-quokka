@@ -41,6 +41,7 @@ export async function createEditCabins(newCabin, id) {
     console.error(error);
     throw new Error("cabins could not be created");
   }
+  if (hasImagePath) return data;
   const { error: storageError } = await supabase.storage
     .from("cabins-images")
     .upload(imageName, newCabin.image);
